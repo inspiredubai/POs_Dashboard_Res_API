@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/bin/Debug/net9.0/PosApi.dll
+/.vs/PosApi/FileContentIndex/06d5c38f-31ed-4b91-9bda-ac5dde3603a3.vsidx
+/.gitignore

@@ -94,4 +94,158 @@ public class DashboardController : ControllerBase
             ReturnObject = summaries
         });
     }
+
+    [HttpGet("GetTransactionsByOutletId")]
+    public async Task<IActionResult> GetTransactionsByOutletId(int outletId)
+    {
+        var transactions = await _context.Transactions
+            .Where(x => x.OutletId == outletId && x.IsDeleted != true)
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new TransactionDto
+            {
+                Id = x.Id,
+                BillNo = x.BillNo,
+                Amount = x.Amount,
+                Cash = x.Cash,
+                Credit = x.Credit,
+                CreatedDateString = x.CreatedAt.HasValue
+                    ? x.CreatedAt.Value.ToString("HH:mm:ss")
+                    : null,
+                OutletId = x.OutletId
+            })
+            .ToListAsync();
+
+        if (!transactions.Any())
+        {
+            return NotFound(new
+            {
+                IsSuccess = false,
+                Status = "NotFound",
+                Message = "No transactions found.",
+                ReturnObject = new List<TransactionDto>()
+            });
+        }
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Status = "Success",
+            Message = "Record Found",
+            ReturnObject = transactions
+        });
+    }
+    [HttpGet("GetDailySummaryByDate")]
+    public async Task<IActionResult> GetDailySummaryByDate(int outletId)
+    {
+        var summary = await _context.DailySummaries
+            .Where(x => x.OutletId == outletId)
+            .OrderByDescending(x => x.SummaryDate)
+            .Select(x => new DailySummaryDto
+            {
+                Id = x.Id,
+                CashAmount = x.CashAmount,
+                CreditCardAmount = x.CreditCardAmount,
+                SalesAmount = x.SalesAmount,
+                TotalBills = x.TotalBills,
+                SummaryDate = x.SummaryDate
+            })
+            .ToListAsync();
+
+        if (!summary.Any())
+        {
+            return NotFound(new
+            {
+                IsSuccess = false,
+                Status = "NotFound",
+                Message = "No records found.",
+                ReturnObject = new List<DailySummaryDto>()
+            });
+        }
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Status = "Success",
+            Message = "Record Found",
+            ReturnObject = summary
+        });
+    }
+
+[HttpGet("GetChartsByType")]
+public async Task<IActionResult> GetChartsByType([FromQuery] string type, [FromQuery] int outletId)
+{
+    var groupSummaries = await _context.GroupSummaries
+        .Where(g => g.OutletId == outletId)
+        .ToListAsync();
+
+    if (groupSummaries == null || !groupSummaries.Any())
+    {
+        return NotFound(new
+        {
+            isSuccess = false,
+            status = "NotFound",
+            message = "No records found.",
+            returnObject = (object)null
+        });
+    }
+
+    var labels = groupSummaries.Select(g => g.GroupName).ToList();
+    var data = groupSummaries.Select(g => g.Amount).ToList();
+
+    var backgroundColors = new List<string>
+    {
+        "#c38cfe", "#20807c", "#7cdc7c", "#2fa992", "#721a90", "#d5708d",
+        "#9c2521", "#7033e7", "#e7cfa5", "#8216ac", "#1f4a23", "#bd0d7d"
+    };
+
+    object chartData;
+
+    if (type.ToLower() == "pie")
+    {
+        chartData = new
+        {
+            labels = labels,
+            datasets = new[]
+            {
+                new {
+                    data = data,
+                    backgroundColor = backgroundColors.Take(data.Count).ToList()
+                }
+            }
+        };
+    }
+    else if (type.ToLower() == "line")
+    {
+        chartData = new
+        {
+            labels = labels,
+            datasets = new[]
+            {
+                new {
+                    data = data,
+                    backgroundColor = backgroundColors.Take(data.Count).ToList()
+                }
+            }
+        };
+    }
+    else
+    {
+        return BadRequest(new
+        {
+            isSuccess = false,
+            status = "Error",
+            message = "Unsupported chart type",
+            returnObject = (object)null
+        });
+    }
+
+    return Ok(new
+    {
+        isSuccess = true,
+        status = "Success",
+        message = "Record Found",
+        returnObject = chartData
+    });
+}
+
 }

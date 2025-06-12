@@ -52,7 +52,11 @@ builder.Services.AddCors(options =>
 });
 
 // Add controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; // Keeps PascalCase as-is
+    });
 
 // Swagger with JWT Bearer Auth
 builder.Services.AddSwaggerGen(c =>

@@ -39,15 +39,26 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Enable CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 // Add controllers
 builder.Services.AddControllers();
 
-// Add Swagger with JWT Bearer Auth
+// Swagger with JWT Bearer Auth
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "POS API", Version = "v1" });
 
-    // Add JWT support
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -74,15 +85,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Build the app
 var app = builder.Build();
 
-// Enable Swagger in development
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Apply CORS BEFORE auth
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

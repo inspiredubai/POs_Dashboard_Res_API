@@ -59,4 +59,39 @@ public class DashboardController : ControllerBase
             });
         }
     }
+
+    [HttpGet("GetGroupSummary")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<IActionResult> GetGroupSummary(int outletId)
+    {
+        var summaries = await _context.GroupSummaries
+            .Where(g => g.OutletId == outletId)
+            .Select(g => new
+            {
+                g.Id,
+                g.GroupName,
+                g.Amount,
+                g.Percentage
+            })
+            .ToListAsync();
+
+        if (summaries == null || summaries.Count == 0)
+        {
+            return NotFound(new
+            {
+                IsSuccess = false,
+                Status = "Failed",
+                Message = "No records found",
+                ReturnObject = new object[] { }
+            });
+        }
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Status = "Success",
+            Message = "Record Found",
+            ReturnObject = summaries
+        });
+    }
 }

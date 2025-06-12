@@ -5059,11 +5059,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/humzamughal/Desktop/PosApi/PosApi.csproj",
+      "projectUniqueName": "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj",
       "projectName": "PosApi",
-      "projectPath": "/Users/humzamughal/Desktop/PosApi/PosApi.csproj",
+      "projectPath": "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj",
       "packagesPath": "/Users/humzamughal/.nuget/packages/",
-      "outputPath": "/Users/humzamughal/Desktop/PosApi/obj/",
+      "outputPath": "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/humzamughal/.nuget/NuGet/NuGet.Config"

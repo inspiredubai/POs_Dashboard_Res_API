@@ -11,5 +11,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>
     }
 
     public DbSet<OutletMaster> OutletMasters { get; set; }
+    public DbSet<GroupSummary> GroupSummaries { get; set; }
+
 }
 

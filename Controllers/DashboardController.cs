@@ -6,6 +6,14 @@ using System.Security.Claims;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
+public class ChartApiResponse
+{
+    public bool IsSuccess { get; set; }
+    public string? Status { get; set; }
+    public string? Message { get; set; }
+    public object? ReturnObject { get; set; }
+}
+
 public class DashboardController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -180,12 +188,12 @@ public async Task<IActionResult> GetChartsByType([FromQuery] string type, [FromQ
 
     if (groupSummaries == null || !groupSummaries.Any())
     {
-        return NotFound(new
+        return NotFound(new ChartApiResponse
         {
-            isSuccess = false,
-            status = "NotFound",
-            message = "No records found.",
-            returnObject = (object)null
+            IsSuccess = false,
+            Status = "NotFound",
+            Message = "No records found.",
+            ReturnObject = null
         });
     }
 
@@ -200,21 +208,7 @@ public async Task<IActionResult> GetChartsByType([FromQuery] string type, [FromQ
 
     object chartData;
 
-    if (type.ToLower() == "pie")
-    {
-        chartData = new
-        {
-            labels = labels,
-            datasets = new[]
-            {
-                new {
-                    data = data,
-                    backgroundColor = backgroundColors.Take(data.Count).ToList()
-                }
-            }
-        };
-    }
-    else if (type.ToLower() == "line")
+    if (type.ToLower() == "pie" || type.ToLower() == "line")
     {
         chartData = new
         {
@@ -230,22 +224,23 @@ public async Task<IActionResult> GetChartsByType([FromQuery] string type, [FromQ
     }
     else
     {
-        return BadRequest(new
+        return BadRequest(new ChartApiResponse
         {
-            isSuccess = false,
-            status = "Error",
-            message = "Unsupported chart type",
-            returnObject = (object)null
+            IsSuccess = false,
+            Status = "Error",
+            Message = "Unsupported chart type",
+            ReturnObject = null
         });
     }
 
-    return Ok(new
+    return Ok(new ChartApiResponse
     {
-        isSuccess = true,
-        status = "Success",
-        message = "Record Found",
-        returnObject = chartData
+        IsSuccess = true,
+        Status = "Success",
+        Message = "Record Found",
+        ReturnObject = chartData
     });
 }
+
 
 }

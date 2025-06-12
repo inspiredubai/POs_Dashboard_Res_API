@@ -120,4 +120,16 @@ public class AuthenticationController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+    [Authorize]
+[HttpPost("Logout")]
+public IActionResult Logout()
+{
+    return Ok(new ApiResponse<bool>
+    {
+        IsSuccess = true,
+        Status = "Success",
+        Message = "User logged out",
+        ReturnObject = true
+    });
+}
 }

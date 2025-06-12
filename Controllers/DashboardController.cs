@@ -96,8 +96,8 @@ public class DashboardController : ControllerBase
         });
     }
 
-    [HttpGet("GetTransactionsByOutletId")]
-    public async Task<IActionResult> GetTransactionsByOutletId(int outletId)
+    [HttpGet("GetTransactions")]
+    public async Task<IActionResult> GetTransactions(int outletId)
     {
         var transactions = await _context.Transactions
             .Where(x => x.OutletId == outletId && x.IsDeleted != true)

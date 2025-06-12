@@ -6,13 +6,6 @@ using System.Security.Claims;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class ChartApiResponse
-{
-    public bool IsSuccess { get; set; }
-    public string? Status { get; set; }
-    public string? Message { get; set; }
-    public object? ReturnObject { get; set; }
-}
 
 public class DashboardController : ControllerBase
 {
@@ -178,69 +171,66 @@ public class DashboardController : ControllerBase
             ReturnObject = summary
         });
     }
-
-[HttpGet("GetChartsByType")]
-public async Task<IActionResult> GetChartsByType([FromQuery] string type, [FromQuery] int outletId)
-{
-    var groupSummaries = await _context.GroupSummaries
-        .Where(g => g.OutletId == outletId)
-        .ToListAsync();
-
-    if (groupSummaries == null || !groupSummaries.Any())
+    [HttpGet("GetChartsByType")]
+    public async Task<IActionResult> GetChartsByType([FromQuery] string type, [FromQuery] int outletId)
     {
-        return NotFound(new ChartApiResponse
+        var groupSummaries = await _context.GroupSummaries
+            .Where(g => g.OutletId == outletId)
+            .ToListAsync();
+
+        if (groupSummaries == null || !groupSummaries.Any())
         {
-            IsSuccess = false,
-            Status = "NotFound",
-            Message = "No records found.",
-            ReturnObject = null
-        });
-    }
+            return NotFound(new ChartResponse
+            {
+                IsSuccess = false,
+                Status = "NotFound",
+                Message = "No records found.",
+                ReturnObject = null
+            });
+        }
 
-    var labels = groupSummaries.Select(g => g.GroupName).ToList();
-    var data = groupSummaries.Select(g => g.Amount).ToList();
+        var labels = groupSummaries.Select(g => g.GroupName).ToList();
+        var data = groupSummaries.Select(g => g.Amount).ToList();
 
-    var backgroundColors = new List<string>
+        var backgroundColors = new List<string>
     {
         "#c38cfe", "#20807c", "#7cdc7c", "#2fa992", "#721a90", "#d5708d",
         "#9c2521", "#7033e7", "#e7cfa5", "#8216ac", "#1f4a23", "#bd0d7d"
     };
 
-    object chartData;
+        object chartData;
 
-    if (type.ToLower() == "pie" || type.ToLower() == "line")
-    {
-        chartData = new
+        if (type.ToLower() == "pie" || type.ToLower() == "line")
         {
-            labels = labels,
-            datasets = new[]
+            chartData = new
             {
+                labels = labels,
+                datasets = new[]
+                {
                 new {
                     data = data,
                     backgroundColor = backgroundColors.Take(data.Count).ToList()
                 }
             }
-        };
-    }
-    else
-    {
-        return BadRequest(new ChartApiResponse
+            };
+        }
+        else
         {
-            IsSuccess = false,
-            Status = "Error",
-            Message = "Unsupported chart type",
-            ReturnObject = null
+            return BadRequest(new ChartResponse
+            {
+                IsSuccess = false,
+                Status = "Error",
+                Message = "Unsupported chart type",
+                ReturnObject = null
+            });
+        }
+
+        return Ok(new ChartResponse
+        {
+            IsSuccess = true,
+            Status = "Success",
+            Message = "Record Found",
+            ReturnObject = chartData
         });
     }
-
-    return Ok(new ChartApiResponse
-    {
-        IsSuccess = true,
-        Status = "Success",
-        Message = "Record Found",
-        ReturnObject = chartData
-    });
-}
-
-
 }

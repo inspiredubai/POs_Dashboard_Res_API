@@ -96,7 +96,7 @@ public class DashboardController : ControllerBase
         });
     }
 
-    [HttpGet("GetTransactions")]
+    [HttpGet("GetTransaction")]
     public async Task<IActionResult> GetTransactions(int outletId)
     {
         var transactions = await _context.Transactions
@@ -233,4 +233,45 @@ public class DashboardController : ControllerBase
             ReturnObject = chartData
         });
     }
+
+[HttpGet("GetTodayStatus")]
+public async Task<IActionResult> GetTodayStatus([FromQuery] int outletId)
+{
+    var status = await _context.TodayStatuses
+        .Where(s => s.OutletId == outletId)
+        .OrderByDescending(s => s.LastBillTime) // optional: get latest entry
+        .FirstOrDefaultAsync();
+
+    if (status == null)
+    {
+        return NotFound(new ApiResponse<object>
+        {
+            IsSuccess = false,
+            Status = "NotFound",
+            Message = "No records found",
+            ReturnObject = null
+        });
+    }
+
+    var dto = new TodayStatusDto
+    {
+        Id = status.Id,
+        CashAmount = status.CashAmount,
+        CreditCardAmount = status.CreditCardAmount,
+        SalesAmount = status.SalesAmount,
+        LastBillAmount = status.LastBillAmount,
+        LastBillTime = status.LastBillTime,
+        TotalBills = status.TotalBills,
+        NoOfCustomers = status.NoOfCustomers
+    };
+
+    return Ok(new ApiResponse<List<TodayStatusDto>>
+    {
+        IsSuccess = true,
+        Status = "Success",
+        Message = "Record Found",
+        ReturnObject = new List<TodayStatusDto> { dto }
+    });
+}
+
 }

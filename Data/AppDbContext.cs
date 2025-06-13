@@ -15,7 +15,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<DailySummary> DailySummaries { get; set; }
 
-
+    public DbSet<TodayStatus> TodayStatuses { get; set; }
 
 }
 

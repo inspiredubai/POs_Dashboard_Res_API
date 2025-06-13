@@ -8,6 +8,7 @@ public class OutletMaster
     public bool IsDeleted { get; set; }
     public int CreatedBy { get; set; }      // FIXED: was string?
     public int ModifiedBy { get; set; }     // FIXED: was string?
-    public DateTime CreatedAt { get; set; }
-    public DateTime ModifiedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? ModifiedAt { get; set; }
+
 }

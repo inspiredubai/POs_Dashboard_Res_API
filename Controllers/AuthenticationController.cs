@@ -78,7 +78,7 @@ public class AuthenticationController : ControllerBase
             user.IsManagement,
             Token = token,
             Role = request.Role,
-            TokenValidation = user.TokenValidation,
+            TokenValidation = user.TokenValidation?.ToString("yyyy-MM-ddTHH:mm:ss"),
             user.IsActive,
             user.IsDeleted,
             user.CreatedBy,

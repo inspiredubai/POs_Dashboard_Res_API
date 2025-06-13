@@ -38,7 +38,8 @@ public class DashboardController : ControllerBase
                 {
                     Id = x.Id,
                     Name = x.Name ?? "",
-                    Value = x.CreatedAt.ToString("dd-MM-yyyy")
+                    Value = x.CreatedAt != null ? x.CreatedAt.Value.ToString("dd-MM-yyyy") : ""
+
                 })
                 .ToListAsync();
 

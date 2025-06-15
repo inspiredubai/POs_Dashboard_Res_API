@@ -111,7 +111,7 @@ public class DashboardController : ControllerBase
                 Cash = x.Cash,
                 Credit = x.Credit,
                  CreatedDateString = x.CreatedAt.HasValue
-    ? x.CreatedAt.Value.AddDays(-1).ToString("yyyy-MM-dd HH:mm:ss")
+    ? x.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")
     : null,
                 OutletId = x.OutletId
             })
@@ -149,7 +149,7 @@ public class DashboardController : ControllerBase
                 CreditCardAmount = x.CreditCardAmount,
                 SalesAmount = x.SalesAmount,
                 TotalBills = x.TotalBills,
-                SummaryDate = x.SummaryDate.AddDays(-1)
+                SummaryDate = x.SummaryDate
             })
             .ToListAsync();
 
@@ -261,7 +261,7 @@ public async Task<IActionResult> GetTodayStatus([FromQuery] int outletId)
         CreditCardAmount = status.CreditCardAmount,
         SalesAmount = status.SalesAmount,
         LastBillAmount = status.LastBillAmount,
-        LastBillTime = status.LastBillTime.AddDays(-1),
+        LastBillTime = status.LastBillTime,
         TotalBills = status.TotalBills,
         NoOfCustomers = status.NoOfCustomers
     };

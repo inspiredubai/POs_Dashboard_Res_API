@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj": {}
+    "/Users/humzmughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj": {}
   },
   "projects": {
-    "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj": {
+    "/Users/humzmughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj",
+        "projectUniqueName": "/Users/humzmughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj",
         "projectName": "PosApi",
-        "projectPath": "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj",
-        "packagesPath": "/Users/humzamughal/.nuget/packages/",
-        "outputPath": "/Users/humzamughal/Documents/GitHub/POs_Dashboard_Res_API/obj/",
+        "projectPath": "/Users/humzmughal/Documents/GitHub/POs_Dashboard_Res_API/PosApi.csproj",
+        "packagesPath": "/Users/humzmughal/.nuget/packages/",
+        "outputPath": "/Users/humzmughal/Documents/GitHub/POs_Dashboard_Res_API/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/humzamughal/.nuget/NuGet/NuGet.Config"
+          "/Users/humzmughal/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"

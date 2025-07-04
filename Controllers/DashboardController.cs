@@ -110,7 +110,7 @@ public class DashboardController : ControllerBase
                 Amount = x.Amount,
                 Cash = x.Cash,
                 Credit = x.Credit,
-                 CreatedDateString = x.CreatedAt.HasValue
+                CreatedDateString = x.CreatedAt.HasValue
     ? x.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")
     : null,
                 OutletId = x.OutletId
@@ -235,43 +235,152 @@ public class DashboardController : ControllerBase
         });
     }
 
-[HttpGet("GetTodayStatus")]
-public async Task<IActionResult> GetTodayStatus([FromQuery] int outletId)
-{
-    var status = await _context.TodayStatuses
-        .Where(s => s.OutletId == outletId)
-        .OrderByDescending(s => s.LastBillTime) // optional: get latest entry
-        .FirstOrDefaultAsync();
-
-    if (status == null)
+    [HttpGet("GetTodayStatus")]
+    public async Task<IActionResult> GetTodayStatus([FromQuery] int outletId)
     {
-        return NotFound(new ApiResponse<object>
+        var status = await _context.TodayStatuses
+            .Where(s => s.OutletId == outletId)
+            .OrderByDescending(s => s.LastBillTime) // optional: get latest entry
+            .FirstOrDefaultAsync();
+
+        if (status == null)
         {
-            IsSuccess = false,
-            Status = "NotFound",
-            Message = "No records found",
-            ReturnObject = null
+            return NotFound(new ApiResponse<object>
+            {
+                IsSuccess = false,
+                Status = "NotFound",
+                Message = "No records found",
+                ReturnObject = null
+            });
+        }
+
+        var dto = new TodayStatusDto
+        {
+            Id = status.Id,
+            CashAmount = status.CashAmount,
+            CreditCardAmount = status.CreditCardAmount,
+            SalesAmount = status.SalesAmount,
+            LastBillAmount = status.LastBillAmount,
+            LastBillTime = status.LastBillTime,
+            TotalBills = status.TotalBills,
+            NoOfCustomers = status.NoOfCustomers
+        };
+
+        return Ok(new ApiResponse<List<TodayStatusDto>>
+        {
+            IsSuccess = true,
+            Status = "Success",
+            Message = "Record Found",
+            ReturnObject = new List<TodayStatusDto> { dto }
         });
     }
 
-    var dto = new TodayStatusDto
+    [HttpGet("GetPendingOrders")]
+    public async Task<IActionResult> GetPendingOrders([FromQuery] int outletId)
     {
-        Id = status.Id,
-        CashAmount = status.CashAmount,
-        CreditCardAmount = status.CreditCardAmount,
-        SalesAmount = status.SalesAmount,
-        LastBillAmount = status.LastBillAmount,
-        LastBillTime = status.LastBillTime,
-        TotalBills = status.TotalBills,
-        NoOfCustomers = status.NoOfCustomers
-    };
+        var pendingOrders = await _context.PendingOrders
+            .Where(p => p.OutletId == outletId)
+            .OrderByDescending(p => p.Id)
+            .Select(p => new
+            {
+                p.Id,
+                p.OrderNo,
+                p.Table,
+                p.WAITER,
+                p.Amount,
+                p.OutletId
+            })
+            .ToListAsync();
 
-    return Ok(new ApiResponse<List<TodayStatusDto>>
+        if (!pendingOrders.Any())
+        {
+            return NotFound(new
+            {
+                IsSuccess = false,
+                Status = "NotFound",
+                Message = "No pending orders found.",
+                ReturnObject = new List<object>()
+            });
+        }
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Status = "Success",
+            Message = "Record Found",
+            ReturnObject = pendingOrders
+        });
+    }
+    [HttpGet("GetPreviousStatus")]
+    public async Task<IActionResult> GetPreviousStatus([FromQuery] int outletId)
+    {
+        var status = await _context.PreviousStatuses
+            .Where(s => s.OutletId == outletId)
+            .OrderByDescending(s => s.Id) // assuming latest is by ID
+            .FirstOrDefaultAsync();
+
+        if (status == null)
+        {
+            return NotFound(new
+            {
+                IsSuccess = false,
+                Status = "NotFound",
+                Message = "No records found.",
+                ReturnObject = new object()
+            });
+        }
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Status = "Success",
+            Message = "Record Found",
+            ReturnObject = new
+            {
+                status.Id,
+                status.CashAmount,
+                status.CreditCardAmount,
+                status.SalesAmount,
+                status.OutletId
+            }
+        });
+    }
+
+[HttpGet("GetVoidTransactions")]
+public async Task<IActionResult> GetVoidTransactions([FromQuery] long outletId)
+{
+    var voidTransactions = await _context.VoidTransactions
+        .Where(v => v.OutLetID == outletId)
+        .OrderByDescending(v => v.DateAndTime)
+        .Select(v => new
+        {
+            v.OrderID,
+            v.DateAndTime,
+            v.ItemName,
+            v.Amount,
+            v.UserName,
+            v.OutLetID,
+            v.Quantity
+        })
+        .ToListAsync();
+
+    if (!voidTransactions.Any())
+    {
+        return NotFound(new
+        {
+            IsSuccess = false,
+            Status = "NotFound",
+            Message = "No void transactions found.",
+            ReturnObject = new List<object>()
+        });
+    }
+
+    return Ok(new
     {
         IsSuccess = true,
         Status = "Success",
         Message = "Record Found",
-        ReturnObject = new List<TodayStatusDto> { dto }
+        ReturnObject = voidTransactions
     });
 }
 

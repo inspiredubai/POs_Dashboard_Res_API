@@ -18,6 +18,21 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>
     public DbSet<VoidTransaction> VoidTransactions { get; set; }
     public DbSet<PreviousStatus> PreviousStatuses { get; set; }
     public DbSet<TodayStatus> TodayStatuses { get; set; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
+        // Mark VoidTransaction as keyless
+        modelBuilder.Entity<VoidTransaction>(entity =>
+        {
+            entity.ToTable("Void_Transactions");
+            entity.HasNoKey();
+        });
+        modelBuilder.Entity<PreviousStatus>().ToTable("PreviousStatus");
+        // Optional: map PreviousStatus to table name if not matching class name
+        //modelBuilder.Entity<PreviousStatus>().ToTable("PreviousStatus");
+
+        // Optional: map other custom-named tables similarly
+    }
 }
 

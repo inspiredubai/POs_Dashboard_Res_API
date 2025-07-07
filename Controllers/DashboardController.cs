@@ -276,75 +276,77 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet("GetPendingOrders")]
-    public async Task<IActionResult> GetPendingOrders([FromQuery] int outletId)
+public async Task<IActionResult> GetPendingOrders([FromQuery] int outletId)
+{
+    var pendingOrders = await _context.PendingOrders
+        .Where(p => p.OutletId == outletId)
+        .OrderByDescending(p => p.Id)
+        .Select(p => new
+        {
+            p.Id,
+            p.OrderNo,
+            p.Table,
+            p.WAITER,
+            p.Amount,
+            p.OutletId
+        })
+        .ToListAsync();
+
+    if (!pendingOrders.Any())
     {
-        var pendingOrders = await _context.PendingOrders
-            .Where(p => p.OutletId == outletId)
-            .OrderByDescending(p => p.Id)
-            .Select(p => new
-            {
-                p.Id,
-                p.OrderNo,
-                p.Table,
-                p.WAITER,
-                p.Amount,
-                p.OutletId
-            })
-            .ToListAsync();
-
-        if (!pendingOrders.Any())
+        return NotFound(new
         {
-            return NotFound(new
-            {
-                IsSuccess = false,
-                Status = "NotFound",
-                Message = "No pending orders found.",
-                ReturnObject = new List<object>()
-            });
-        }
-
-        return Ok(new
-        {
-            IsSuccess = true,
-            Status = "Success",
-            Message = "Record Found",
-            ReturnObject = pendingOrders
+            IsSuccess = false,
+            Status = "NotFound",
+            Message = "No pending orders found.",
+            ReturnObject = new List<object>()
         });
     }
-    [HttpGet("GetPreviousStatus")]
-    public async Task<IActionResult> GetPreviousStatus([FromQuery] int outletId)
+
+    return Ok(new
     {
-        var status = await _context.PreviousStatuses
-            .Where(s => s.OutletId == outletId)
-            .OrderByDescending(s => s.Id) // assuming latest is by ID
-            .FirstOrDefaultAsync();
-
-        if (status == null)
+        IsSuccess = true,
+        Status = "Success",
+        Message = "Record Found",
+        ReturnObject = pendingOrders
+    });
+}
+   [HttpGet("GetPreviousStatus")]
+public async Task<IActionResult> GetPreviousStatus([FromQuery] int outletId)
+{
+    var statusList = await _context.PreviousStatuses
+        .Where(s => s.OutletId == outletId)
+        .OrderByDescending(s => s.Id)
+        .Select(status => new
         {
-            return NotFound(new
-            {
-                IsSuccess = false,
-                Status = "NotFound",
-                Message = "No records found.",
-                ReturnObject = new object()
-            });
-        }
+            status.Id,
+            status.CashAmount,
+            status.CreditCardAmount,
+            status.SalesAmount,
+            status.OutletId,
+            OrderDate = status.OrderDate.ToString("yyyy-MM-dd HH:mm:ss")
+        })
+        .ToListAsync();
 
-        return Ok(new
+    if (!statusList.Any())
+    {
+        return NotFound(new
         {
-            IsSuccess = true,
-            Status = "Success",
-            Message = "Record Found",
-            ReturnObject = new
-            {
-                status.Id,
-                status.CashAmount,
-                status.CreditCardAmount,
-                status.SalesAmount,
-                status.OutletId
-            }
+            IsSuccess = false,
+            Status = "NotFound",
+            Message = "No records found.",
+            ReturnObject = new List<object>()
         });
     }
+
+    return Ok(new
+    {
+        IsSuccess = true,
+        Status = "Success",
+        Message = "Records Found",
+        ReturnObject = statusList
+    });
+}
 
 [HttpGet("GetVoidTransactions")]
 public async Task<IActionResult> GetVoidTransactions([FromQuery] long outletId)

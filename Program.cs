@@ -9,6 +9,15 @@ using PosApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+// Validate JWT secret early so we fail fast with a clear message
+var secretKeyBase64 = configuration["Jwt:SecretKey"];
+if (string.IsNullOrWhiteSpace(secretKeyBase64))
+{
+    throw new InvalidOperationException("Configuration value 'Jwt:SecretKey' is missing or empty. Check appsettings.json.");
+}
+
+var signingKey = new SymmetricSecurityKey(Convert.FromBase64String(secretKeyBase64));
+
 // EF Core + Identity
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
@@ -31,7 +40,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(configuration["Jwt:SecretKey"])),
+        IssuerSigningKey = signingKey,
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidIssuer = configuration["Jwt:Issuer"],
@@ -42,23 +51,25 @@ builder.Services.AddAuthentication(options =>
 // Enable CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    // avoid shadowing the outer 'builder' variable
+    options.AddPolicy("AllowAll", corsBuilder =>
     {
-        builder
+        corsBuilder
             .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
 });
 
-// Add controllers
+// Add controllers + JSON options
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = null; // Keeps PascalCase as-is
     });
 
-// Swagger with JWT Bearer Auth
+// Swagger + small extras
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "POS API", Version = "v1" });
@@ -91,12 +102,15 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Swagger
+// Always enable Swagger in Development; you can toggle this if needed
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// redirect to HTTPS (optional but recommended)
+app.UseHttpsRedirection();
 
 // Apply CORS BEFORE auth
 app.UseCors("AllowAll");
